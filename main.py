@@ -1,6 +1,6 @@
-from src.config import load_config
+from src.utils.config import load_config
+from src.utils.formatter import print_scrape_results
 from src.scraper import FinlabStrategyScraper
-from src.formatter import print_scrape_results
 
 
 def main():
