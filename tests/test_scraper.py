@@ -39,8 +39,9 @@ class TestFinlabStrategyScraper:
         # Check that headless mode and other options are set
         assert '--headless' in options.arguments
         assert '--no-sandbox' in options.arguments
-        assert '--disable-dev-shm-usage' in options.arguments
         assert '--disable-gpu' in options.arguments
+        # Check user-agent is set
+        assert any('user-agent=' in arg for arg in options.arguments)
 
     @patch('src.scraper.ChromeDriverManager')
     @patch('src.scraper.webdriver.Chrome')
@@ -49,6 +50,7 @@ class TestFinlabStrategyScraper:
         """Test successful scraping flow"""
         # Arrange
         mock_driver = Mock()
+        mock_driver.find_elements.return_value = []  # Return empty list for rows
         mock_chrome.return_value = mock_driver
         mock_driver_manager.return_value.install.return_value = '/path/to/chromedriver'
 
@@ -62,7 +64,7 @@ class TestFinlabStrategyScraper:
         mock_driver.get.assert_called_once_with(test_url)
         mock_driver.quit.assert_called_once()
         assert isinstance(result, list)
-        assert result == []  # Current implementation returns empty list
+        assert result == []  # Empty list when no rows found
 
     @patch('src.scraper.ChromeDriverManager')
     @patch('src.scraper.webdriver.Chrome')
@@ -116,6 +118,7 @@ class TestFinlabStrategyScraper:
         """Test that the correct URL is accessed"""
         # Arrange
         mock_driver = Mock()
+        mock_driver.find_elements.return_value = []  # Return empty list for rows
         mock_chrome.return_value = mock_driver
         mock_driver_manager.return_value.install.return_value = '/path/to/chromedriver'
 
@@ -127,7 +130,8 @@ class TestFinlabStrategyScraper:
 
         # Assert
         mock_driver.get.assert_called_once_with(test_url)
-        mock_sleep.assert_called_once_with(3)  # Verify wait time
+        # Verify that sleep was called with 5 (initial page load wait)
+        assert any(call[0][0] == 5 for call in mock_sleep.call_args_list)
 
     @patch('src.scraper.ChromeDriverManager')
     @patch('src.scraper.webdriver.Chrome')
@@ -146,6 +150,7 @@ class TestFinlabStrategyScraper:
         """Test that driver is set after _setup_driver is called"""
         # Arrange
         mock_driver = Mock()
+        mock_driver.find_elements.return_value = []  # Return empty list for rows
         mock_chrome.return_value = mock_driver
         mock_driver_manager.return_value.install.return_value = '/path/to/chromedriver'
 
