@@ -19,6 +19,8 @@ def load_config():
     load_dotenv()
 
     target_url = os.getenv("TARGET_URL")
+    line_channel_access_token = os.getenv("LINE_CHANNEL_ACCESS_TOKEN")
+    line_user_id = os.getenv("LINE_USER_ID")
     line_webhook_url = os.getenv("LINE_WEBHOOK_URL")
 
     if not target_url:
@@ -28,5 +30,7 @@ def load_config():
 
     return {
         "target_url": target_url,
+        "line_channel_access_token": line_channel_access_token,
+        "line_user_id": line_user_id,
         "line_webhook_url": line_webhook_url
     }
