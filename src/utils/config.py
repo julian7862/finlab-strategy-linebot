@@ -24,7 +24,14 @@ def load_config():
     target_url = os.environ.get('TARGET_URL') or os.getenv("TARGET_URL")
     line_channel_access_token = os.environ.get('LINE_CHANNEL_ACCESS_TOKEN') or os.getenv("LINE_CHANNEL_ACCESS_TOKEN")
     line_user_id = os.environ.get('LINE_USER_ID') or os.getenv("LINE_USER_ID")
+    line_group_ids_str = os.environ.get('LINE_GROUP_IDS') or os.getenv("LINE_GROUP_IDS")
     line_webhook_url = os.environ.get('LINE_WEBHOOK_URL') or os.getenv("LINE_WEBHOOK_URL")
+
+    # 解析逗號分隔的 LINE_GROUP_IDS
+    line_group_ids = []
+    if line_group_ids_str:
+        # 分割字串，移除空白，過濾空值
+        line_group_ids = [gid.strip() for gid in line_group_ids_str.split(',') if gid.strip()]
 
     if not target_url:
         print("錯誤：未在環境變數或 .env 檔案中找到 'TARGET_URL'。")
@@ -35,5 +42,6 @@ def load_config():
         "target_url": target_url,
         "line_channel_access_token": line_channel_access_token,
         "line_user_id": line_user_id,
+        "line_group_ids": line_group_ids,
         "line_webhook_url": line_webhook_url
     }

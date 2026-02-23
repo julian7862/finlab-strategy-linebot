@@ -109,3 +109,71 @@ class TestConfig:
         assert config['line_channel_access_token'] is None
         assert config['line_user_id'] is None
         assert config['line_webhook_url'] is None
+
+    @patch('src.utils.config.load_dotenv')
+    @patch('src.utils.config.os.getenv')
+    @patch.dict(os.environ, {
+        'TARGET_URL': 'https://test.com',
+        'LINE_GROUP_IDS': 'group1,group2,group3'
+    }, clear=True)
+    def test_parse_line_group_ids(self, mock_getenv, mock_load_dotenv):
+        """Test parsing comma-separated LINE_GROUP_IDS"""
+        # Arrange
+        mock_getenv.return_value = None
+
+        # Act
+        config = load_config()
+
+        # Assert
+        assert config['line_group_ids'] == ['group1', 'group2', 'group3']
+
+    @patch('src.utils.config.load_dotenv')
+    @patch('src.utils.config.os.getenv')
+    @patch.dict(os.environ, {
+        'TARGET_URL': 'https://test.com',
+        'LINE_GROUP_IDS': 'group1 , group2 , group3 '
+    }, clear=True)
+    def test_parse_line_group_ids_with_whitespace(self, mock_getenv, mock_load_dotenv):
+        """Test parsing LINE_GROUP_IDS with whitespace"""
+        # Arrange
+        mock_getenv.return_value = None
+
+        # Act
+        config = load_config()
+
+        # Assert
+        assert config['line_group_ids'] == ['group1', 'group2', 'group3']
+
+    @patch('src.utils.config.load_dotenv')
+    @patch('src.utils.config.os.getenv')
+    @patch.dict(os.environ, {'TARGET_URL': 'https://test.com'}, clear=True)
+    def test_empty_line_group_ids(self, mock_getenv, mock_load_dotenv):
+        """Test that empty LINE_GROUP_IDS returns empty list"""
+        # Arrange
+        mock_getenv.return_value = None
+
+        # Act
+        config = load_config()
+
+        # Assert
+        assert config['line_group_ids'] == []
+
+    @patch('src.utils.config.load_dotenv')
+    @patch('src.utils.config.os.getenv')
+    @patch.dict(os.environ, {
+        'TARGET_URL': 'https://test.com',
+        'LINE_GROUP_IDS': 'Ce8baec57b9b59c0b19766c6988ccd0b9,Cae25addef5acd7a43e1a075dc8e01728'
+    }, clear=True)
+    def test_parse_real_line_group_ids(self, mock_getenv, mock_load_dotenv):
+        """Test parsing real LINE group IDs"""
+        # Arrange
+        mock_getenv.return_value = None
+
+        # Act
+        config = load_config()
+
+        # Assert
+        assert config['line_group_ids'] == [
+            'Ce8baec57b9b59c0b19766c6988ccd0b9',
+            'Cae25addef5acd7a43e1a075dc8e01728'
+        ]
