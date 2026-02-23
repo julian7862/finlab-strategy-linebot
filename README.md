@@ -6,7 +6,8 @@ A Python bot that scrapes Finlab strategy stock data and sends notifications to 
 
 - 🔍 Automated web scraping of Finlab strategy holdings
 - 📱 LINE Bot integration for instant notifications
-- 🧪 Comprehensive unit tests (22 tests, 69% coverage)
+- 👥 Multiple LINE group support for broadcasting notifications
+- 🧪 Comprehensive unit tests (30 tests, 70% coverage)
 - 🐳 Environment variable support for easy deployment
 - 🔄 CI/CD ready with GitHub Actions
 
@@ -59,6 +60,7 @@ Update the following variables in `.env`:
 ```env
 LINE_CHANNEL_ACCESS_TOKEN=your_line_channel_access_token_here
 LINE_USER_ID=your_line_user_id_here
+LINE_GROUP_IDS=group_id_1,group_id_2,group_id_3  # Optional, comma-separated
 TARGET_URL=https://your_target_website_here
 CHROME_DRIVER_PATH=/usr/local/bin/chromedriver  # Optional
 ```
@@ -69,6 +71,7 @@ CHROME_DRIVER_PATH=/usr/local/bin/chromedriver  # Optional
 export TARGET_URL=https://your_target_website_here
 export LINE_CHANNEL_ACCESS_TOKEN=your_token_here
 export LINE_USER_ID=your_user_id_here
+export LINE_GROUP_IDS=group_id_1,group_id_2,group_id_3  # Optional
 ```
 
 > **Note:** OS environment variables take priority over `.env` file values.
@@ -122,7 +125,7 @@ pytest tests/test_scraper.py -v
 
 1. **Scraping**: Uses Selenium to navigate to the target website, switch into iframe, click the "選股" tab, and extract stock data
 2. **Formatting**: Formats the scraped data into a readable format
-3. **Notification**: Sends formatted data to LINE Bot (if credentials are configured)
+3. **Notification**: Sends formatted data to LINE Bot user and optionally to multiple LINE groups (if credentials are configured)
 
 ## Environment Variables
 
@@ -131,6 +134,7 @@ pytest tests/test_scraper.py -v
 | `TARGET_URL` | ✅ Yes | URL of the Finlab strategy page |
 | `LINE_CHANNEL_ACCESS_TOKEN` | ⚠️ Optional | LINE Bot channel access token |
 | `LINE_USER_ID` | ⚠️ Optional | LINE user ID to send messages to |
+| `LINE_GROUP_IDS` | ❌ No | Comma-separated LINE group IDs (e.g., `group1,group2,group3`) |
 | `LINE_WEBHOOK_URL` | ❌ No | LINE webhook URL (future use) |
 | `CHROME_DRIVER_PATH` | ❌ No | Custom ChromeDriver path |
 
@@ -158,6 +162,7 @@ The application supports deployment to various platforms:
 ENV TARGET_URL=https://production.com
 ENV LINE_CHANNEL_ACCESS_TOKEN=prod_token
 ENV LINE_USER_ID=prod_user_id
+ENV LINE_GROUP_IDS=group_id_1,group_id_2
 ```
 
 **Heroku:**
@@ -165,6 +170,7 @@ ENV LINE_USER_ID=prod_user_id
 heroku config:set TARGET_URL=https://production.com
 heroku config:set LINE_CHANNEL_ACCESS_TOKEN=prod_token
 heroku config:set LINE_USER_ID=prod_user_id
+heroku config:set LINE_GROUP_IDS=group_id_1,group_id_2
 ```
 
 **GitHub Actions:**
@@ -192,6 +198,12 @@ pip install -r requirements.txt
 - Verify `LINE_CHANNEL_ACCESS_TOKEN` is correct
 - Verify `LINE_USER_ID` is correct
 - Check LINE Bot console for errors
+
+**Issue: LINE group notifications not working**
+- Ensure your LINE Bot has been added to the target groups
+- Verify `LINE_GROUP_IDS` are comma-separated without quotes
+- Check that group IDs start with 'C' (e.g., `Ce8baec57b9b59c0b19766c6988ccd0b9`)
+- Find group IDs by checking LINE Bot webhook logs or using LINE Messaging API
 
 ## License
 
