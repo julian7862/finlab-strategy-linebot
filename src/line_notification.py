@@ -45,7 +45,7 @@ class LineNotification:
 
         # 格式化開盤買入區塊
         if open_buy:
-            message_lines.append("🔔 新增買入")
+            message_lines.append("✅ 本日新增買入")
             for stock in open_buy:
                 message_lines.append(f"  • {stock.get('name', 'N/A')} ({stock.get('stock_id', 'N/A')})")
             message_lines.append("")
