@@ -327,7 +327,7 @@ class TestLineNotification:
             message = notifier.format_stock_message(test_data)
 
             assert '📊 Finlab 策略持股報告' in message
-            assert '🔔 新增買入' in message
+            assert '✅ 本日新增買入' in message
             assert '青雲' in message
             assert '5386' in message
             assert '📈 目前持股' in message
@@ -389,7 +389,7 @@ class TestLineNotification:
             message = notifier.format_stock_message(test_data)
 
             assert '📊 Finlab 策略持股報告' in message
-            assert '🔔 新增買入' in message
+            assert '✅ 本日新增買入' in message
             assert '青雲' in message
             assert '5386' in message
             assert '科嶠' in message
@@ -434,7 +434,7 @@ class TestLineNotification:
 
             message = notifier.format_stock_message(test_data)
 
-            assert '🔔 新增買入' in message
+            assert '✅ 本日新增買入' in message
             assert '股票1' in message
             assert '1111' in message
             assert '股票2' in message
