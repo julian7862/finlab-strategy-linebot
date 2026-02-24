@@ -37,9 +37,16 @@ class FinlabStrategyScraper:
             url (str): 目標網址
 
         Returns:
-            list: 包含持股資料的字典列表
+            dict: 包含 holdings 和 open_buy 資料的字典
+                {
+                    "holdings": [...],
+                    "open_buy": [...]
+                }
         """
-        data_list = []
+        result_data = {
+            "holdings": [],
+            "open_buy": []
+        }
         try:
             # 設定 WebDriver
             self._setup_driver()
@@ -94,11 +101,11 @@ class FinlabStrategyScraper:
             except:
                 print("表格載入超時，嘗試直接抓取...")
 
-            print("抓取資料中...")
+            print("抓取持股資料中...")
 
             # 定位表格列 (Rows)
             rows = self.driver.find_elements(By.CSS_SELECTOR, "table tbody tr")
-            print(f"找到 {len(rows)} 行資料")
+            print(f"找到 {len(rows)} 行持股資料")
 
             for row in rows:
                 item = {}
@@ -144,10 +151,46 @@ class FinlabStrategyScraper:
                     item['profit_percentage'] = "N/A"
                     item['current_weight'] = "N/A"
 
-                data_list.append(item)
+                result_data["holdings"].append(item)
 
-            print(f"成功抓取 {len(data_list)} 筆資料")
-            return data_list
+            print(f"成功抓取 {len(result_data['holdings'])} 筆持股資料")
+
+            # 抓取「開盤買入」區塊
+            try:
+                print("正在尋找「開盤買入」區塊...")
+                # 尋找是否有 h2 標題為「開盤買入」
+                open_buy_headers = self.driver.find_elements(By.XPATH, "//h2[text()='開盤買入']")
+
+                if len(open_buy_headers) > 0:
+                    print("✅ 偵測到「開盤買入」區塊，開始抓取...")
+                    # 定位到開盤買入下方的 grid 容器內的所有股票 div
+                    items_xpath = "//h2[text()='開盤買入']/parent::div/following-sibling::div[contains(@class, 'grid')]/div"
+                    stock_items = self.driver.find_elements(By.XPATH, items_xpath)
+
+                    for item in stock_items:
+                        stock_data = {}
+                        try:
+                            name_el = item.find_element(By.CSS_SELECTOR, ".whitespace-nowrap.font-bold.text-base-content-200")
+                            stock_data['name'] = name_el.text.strip()
+                        except:
+                            stock_data['name'] = "N/A"
+
+                        try:
+                            id_el = item.find_element(By.CSS_SELECTOR, ".font-light.text-base-content-300")
+                            stock_data['stock_id'] = id_el.text.strip()
+                        except:
+                            stock_data['stock_id'] = "N/A"
+
+                        result_data["open_buy"].append(stock_data)
+
+                    print(f"✅ 成功抓取 {len(result_data['open_buy'])} 筆開盤買入資料")
+                else:
+                    print("ℹ️ 畫面上未偵測到「開盤買入」區塊。")
+
+            except Exception as e:
+                print(f"抓取「開盤買入」時發生錯誤: {e}")
+
+            return result_data
 
         except Exception as e:
             print(f"抓取過程發生錯誤: {e}")

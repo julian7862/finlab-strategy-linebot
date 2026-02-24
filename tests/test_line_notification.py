@@ -21,7 +21,7 @@ class TestLineNotification:
             mock_api.assert_called_once_with(token)
 
     def test_format_stock_message_with_data(self):
-        """Test formatting stock message with valid data"""
+        """Test formatting stock message with valid data (backward compatible with list)"""
         token = "test_token"
         user_id = "test_user_id"
 
@@ -55,7 +55,7 @@ class TestLineNotification:
             assert '總計: 2 檔股票' in message
 
     def test_format_stock_message_empty_data(self):
-        """Test formatting stock message with empty data"""
+        """Test formatting stock message with empty data (backward compatible with list)"""
         token = "test_token"
         user_id = "test_user_id"
 
@@ -64,7 +64,10 @@ class TestLineNotification:
 
             message = notifier.format_stock_message([])
 
-            assert message == "目前無持股資料"
+            # Empty list is converted to dict with empty holdings and open_buy
+            assert '📊 Finlab 策略持股報告' in message
+            assert '📭 本日無新增持股' in message
+            assert '目前無持股資料' in message
 
     def test_format_stock_message_missing_fields(self):
         """Test formatting stock message with missing fields"""
@@ -294,3 +297,147 @@ class TestLineNotification:
         # Should only call push_message once for user
         mock_api_instance.push_message.assert_called_once()
         assert mock_api_instance.push_message.call_args[0][0] == user_id
+
+    def test_format_stock_message_with_new_dict_format(self):
+        """Test formatting stock message with new dict format"""
+        token = "test_token"
+        user_id = "test_user_id"
+
+        with patch('src.line_notification.LineBotApi'):
+            notifier = LineNotification(token, user_id)
+
+            test_data = {
+                "holdings": [
+                    {
+                        'name': '科嶠',
+                        'stock_id': '4542',
+                        'entry_date': '2026/2/6',
+                        'profit_percentage': '▴ 10.00%',
+                        'current_weight': '20.0%'
+                    }
+                ],
+                "open_buy": [
+                    {
+                        'name': '青雲',
+                        'stock_id': '5386'
+                    }
+                ]
+            }
+
+            message = notifier.format_stock_message(test_data)
+
+            assert '📊 Finlab 策略持股報告' in message
+            assert '🔔 新增買入' in message
+            assert '青雲' in message
+            assert '5386' in message
+            assert '📈 目前持股' in message
+            assert '科嶠' in message
+            assert '4542' in message
+            assert '總計: 1 檔股票' in message
+
+    def test_format_stock_message_with_no_open_buy(self):
+        """Test formatting stock message when no open_buy stocks"""
+        token = "test_token"
+        user_id = "test_user_id"
+
+        with patch('src.line_notification.LineBotApi'):
+            notifier = LineNotification(token, user_id)
+
+            test_data = {
+                "holdings": [
+                    {
+                        'name': '科嶠',
+                        'stock_id': '4542',
+                        'entry_date': '2026/2/6',
+                        'profit_percentage': '▴ 10.00%',
+                        'current_weight': '20.0%'
+                    }
+                ],
+                "open_buy": []
+            }
+
+            message = notifier.format_stock_message(test_data)
+
+            assert '📊 Finlab 策略持股報告' in message
+            assert '📭 本日無新增持股' in message
+            assert '📈 目前持股' in message
+            assert '科嶠' in message
+            assert '總計: 1 檔股票' in message
+
+    def test_format_stock_message_with_only_open_buy(self):
+        """Test formatting stock message with only open_buy stocks"""
+        token = "test_token"
+        user_id = "test_user_id"
+
+        with patch('src.line_notification.LineBotApi'):
+            notifier = LineNotification(token, user_id)
+
+            test_data = {
+                "holdings": [],
+                "open_buy": [
+                    {
+                        'name': '青雲',
+                        'stock_id': '5386'
+                    },
+                    {
+                        'name': '科嶠',
+                        'stock_id': '4542'
+                    }
+                ]
+            }
+
+            message = notifier.format_stock_message(test_data)
+
+            assert '📊 Finlab 策略持股報告' in message
+            assert '🔔 新增買入' in message
+            assert '青雲' in message
+            assert '5386' in message
+            assert '科嶠' in message
+            assert '4542' in message
+            assert '目前無持股資料' in message
+
+    def test_format_stock_message_with_no_data(self):
+        """Test formatting stock message when both holdings and open_buy are empty"""
+        token = "test_token"
+        user_id = "test_user_id"
+
+        with patch('src.line_notification.LineBotApi'):
+            notifier = LineNotification(token, user_id)
+
+            test_data = {
+                "holdings": [],
+                "open_buy": []
+            }
+
+            message = notifier.format_stock_message(test_data)
+
+            assert '📊 Finlab 策略持股報告' in message
+            assert '📭 本日無新增持股' in message
+            assert '目前無持股資料' in message
+
+    def test_format_stock_message_with_multiple_open_buy(self):
+        """Test formatting stock message with multiple open_buy stocks"""
+        token = "test_token"
+        user_id = "test_user_id"
+
+        with patch('src.line_notification.LineBotApi'):
+            notifier = LineNotification(token, user_id)
+
+            test_data = {
+                "holdings": [],
+                "open_buy": [
+                    {'name': '股票1', 'stock_id': '1111'},
+                    {'name': '股票2', 'stock_id': '2222'},
+                    {'name': '股票3', 'stock_id': '3333'}
+                ]
+            }
+
+            message = notifier.format_stock_message(test_data)
+
+            assert '🔔 新增買入' in message
+            assert '股票1' in message
+            assert '1111' in message
+            assert '股票2' in message
+            assert '2222' in message
+            assert '股票3' in message
+            assert '3333' in message

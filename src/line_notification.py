@@ -29,24 +29,42 @@ class LineNotification:
         將股票資料格式化為 LINE 訊息
 
         Args:
-            data (list): 股票資料列表
+            data (dict or list): 股票資料字典 {"holdings": [...], "open_buy": [...]} 或舊格式列表
 
         Returns:
             str: 格式化後的訊息
         """
-        if not data:
-            return "目前無持股資料"
+        # 向後兼容：如果傳入的是 list，轉換為新格式
+        if isinstance(data, list):
+            data = {"holdings": data, "open_buy": []}
+
+        holdings = data.get("holdings", [])
+        open_buy = data.get("open_buy", [])
 
         message_lines = ["📊 Finlab 策略持股報告\n"]
 
-        for index, stock in enumerate(data, 1):
-            message_lines.append(f"[{index}] {stock.get('name', 'N/A')} ({stock.get('stock_id', 'N/A')})")
-            message_lines.append(f"  📅 進場日期: {stock.get('entry_date', 'N/A')}")
-            message_lines.append(f"  💰 獲利: {stock.get('profit_percentage', 'N/A')}")
-            message_lines.append(f"  ⚖️  權重: {stock.get('current_weight', 'N/A')}")
+        # 格式化開盤買入區塊
+        if open_buy:
+            message_lines.append("🔔 新增買入")
+            for stock in open_buy:
+                message_lines.append(f"  • {stock.get('name', 'N/A')} ({stock.get('stock_id', 'N/A')})")
             message_lines.append("")
+        else:
+            message_lines.append("📭 本日無新增持股\n")
 
-        message_lines.append(f"總計: {len(data)} 檔股票")
+        # 格式化持股區塊
+        if holdings:
+            message_lines.append("📈 目前持股")
+            for index, stock in enumerate(holdings, 1):
+                message_lines.append(f"[{index}] {stock.get('name', 'N/A')} ({stock.get('stock_id', 'N/A')})")
+                message_lines.append(f"  📅 進場日期: {stock.get('entry_date', 'N/A')}")
+                message_lines.append(f"  💰 獲利: {stock.get('profit_percentage', 'N/A')}")
+                message_lines.append(f"  ⚖️  權重: {stock.get('current_weight', 'N/A')}")
+                message_lines.append("")
+
+            message_lines.append(f"總計: {len(holdings)} 檔股票")
+        else:
+            message_lines.append("目前無持股資料")
 
         return "\n".join(message_lines)
 
