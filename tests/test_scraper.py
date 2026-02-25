@@ -354,3 +354,166 @@ class TestFinlabStrategyScraper:
         assert len(result["open_buy"]) == 1
         assert result["open_buy"][0]["name"] == "N/A"
         assert result["open_buy"][0]["stock_id"] == "N/A"
+
+    @patch('src.scraper.ChromeDriverManager')
+    @patch('src.scraper.webdriver.Chrome')
+    @patch('src.scraper.time.sleep')
+    def test_scrape_holdings_with_positive_and_negative_profits(self, mock_sleep, mock_chrome, mock_driver_manager):
+        """Test scraping holdings with both positive and negative profit percentages using slot attributes"""
+        # Arrange
+        mock_driver = Mock()
+        mock_chrome.return_value = mock_driver
+        mock_driver_manager.return_value.install.return_value = '/path/to/chromedriver'
+
+        # Create mock rows - one with positive profit, one with negative profit
+        mock_row1 = Mock()
+        mock_row2 = Mock()
+
+        # Row 1: Positive profit (+15.5%)
+        mock_name1 = Mock()
+        mock_name1.text = "台積電"
+        mock_id1 = Mock()
+        mock_id1.text = "2330"
+        mock_date1 = Mock()
+        mock_date1.text = "2024-01-15"
+        mock_profit1 = Mock()
+        mock_profit1.text = "+15.5%"
+        mock_weight1 = Mock()
+        mock_weight1.text = "25.3%"
+
+        def row1_find_element(by, selector):
+            if selector == ".whitespace-nowrap.font-bold.text-base-content-300":
+                return mock_name1
+            elif selector == ".font-light.text-base-content-200":
+                return mock_id1
+            elif selector == "div[slot='entryDate'] .lining-nums.svelte-1nx0ef2":
+                return mock_date1
+            elif selector == "div[slot='profit'] span:first-child":
+                return mock_profit1
+            elif selector == "div[slot='currentWeight'] span":
+                return mock_weight1
+            raise Exception(f"Element not found: {selector}")
+
+        mock_row1.find_element.side_effect = row1_find_element
+
+        # Row 2: Negative profit (-8.2%)
+        mock_name2 = Mock()
+        mock_name2.text = "聯發科"
+        mock_id2 = Mock()
+        mock_id2.text = "2454"
+        mock_date2 = Mock()
+        mock_date2.text = "2024-02-10"
+        mock_profit2 = Mock()
+        mock_profit2.text = "-8.2%"
+        mock_weight2 = Mock()
+        mock_weight2.text = "18.7%"
+
+        def row2_find_element(by, selector):
+            if selector == ".whitespace-nowrap.font-bold.text-base-content-300":
+                return mock_name2
+            elif selector == ".font-light.text-base-content-200":
+                return mock_id2
+            elif selector == "div[slot='entryDate'] .lining-nums.svelte-1nx0ef2":
+                return mock_date2
+            elif selector == "div[slot='profit'] span:first-child":
+                return mock_profit2
+            elif selector == "div[slot='currentWeight'] span":
+                return mock_weight2
+            raise Exception(f"Element not found: {selector}")
+
+        mock_row2.find_element.side_effect = row2_find_element
+
+        # Configure find_elements to return our mock rows
+        def find_elements_side_effect(by, selector):
+            if selector == "table tbody tr":
+                return [mock_row1, mock_row2]
+            elif selector == "//h2[text()='開盤買入']":
+                return []  # No open buy section for this test
+            return []
+
+        mock_driver.find_elements.side_effect = find_elements_side_effect
+
+        scraper = FinlabStrategyScraper()
+        test_url = "https://example.com"
+
+        # Act
+        result = scraper.scrape(test_url)
+
+        # Assert
+        assert isinstance(result, dict)
+        assert "holdings" in result
+        assert len(result["holdings"]) == 2
+
+        # Verify first holding (positive profit)
+        assert result["holdings"][0]["name"] == "台積電"
+        assert result["holdings"][0]["stock_id"] == "2330"
+        assert result["holdings"][0]["entry_date"] == "2024-01-15"
+        assert result["holdings"][0]["profit_percentage"] == "+15.5%"
+        assert result["holdings"][0]["current_weight"] == "25.3%"
+
+        # Verify second holding (negative profit)
+        assert result["holdings"][1]["name"] == "聯發科"
+        assert result["holdings"][1]["stock_id"] == "2454"
+        assert result["holdings"][1]["entry_date"] == "2024-02-10"
+        assert result["holdings"][1]["profit_percentage"] == "-8.2%"
+        assert result["holdings"][1]["current_weight"] == "18.7%"
+
+    @patch('src.scraper.ChromeDriverManager')
+    @patch('src.scraper.webdriver.Chrome')
+    @patch('src.scraper.time.sleep')
+    def test_scrape_holdings_with_missing_profit_weight(self, mock_sleep, mock_chrome, mock_driver_manager):
+        """Test scraping holdings when profit or weight elements are missing"""
+        # Arrange
+        mock_driver = Mock()
+        mock_chrome.return_value = mock_driver
+        mock_driver_manager.return_value.install.return_value = '/path/to/chromedriver'
+
+        mock_row = Mock()
+
+        # Mock basic fields but profit and weight will throw exceptions
+        mock_name = Mock()
+        mock_name.text = "測試股票"
+        mock_id = Mock()
+        mock_id.text = "1234"
+        mock_date = Mock()
+        mock_date.text = "2024-03-01"
+
+        def row_find_element(by, selector):
+            if selector == ".whitespace-nowrap.font-bold.text-base-content-300":
+                return mock_name
+            elif selector == ".font-light.text-base-content-200":
+                return mock_id
+            elif selector == "div[slot='entryDate'] .lining-nums.svelte-1nx0ef2":
+                return mock_date
+            elif selector == "div[slot='profit'] span:first-child":
+                raise Exception("Profit element not found")
+            elif selector == "div[slot='currentWeight'] span":
+                raise Exception("Weight element not found")
+            raise Exception(f"Element not found: {selector}")
+
+        mock_row.find_element.side_effect = row_find_element
+
+        # Configure find_elements
+        def find_elements_side_effect(by, selector):
+            if selector == "table tbody tr":
+                return [mock_row]
+            elif selector == "//h2[text()='開盤買入']":
+                return []
+            return []
+
+        mock_driver.find_elements.side_effect = find_elements_side_effect
+
+        scraper = FinlabStrategyScraper()
+        test_url = "https://example.com"
+
+        # Act
+        result = scraper.scrape(test_url)
+
+        # Assert
+        assert isinstance(result, dict)
+        assert len(result["holdings"]) == 1
+        assert result["holdings"][0]["name"] == "測試股票"
+        assert result["holdings"][0]["stock_id"] == "1234"
+        assert result["holdings"][0]["entry_date"] == "2024-03-01"
+        assert result["holdings"][0]["profit_percentage"] == "N/A"
+        assert result["holdings"][0]["current_weight"] == "N/A"

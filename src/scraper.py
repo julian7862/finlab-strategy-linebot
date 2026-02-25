@@ -133,22 +133,20 @@ class FinlabStrategyScraper:
                     # 若抓不到，嘗試抓該行所有的 lining-nums
                     item['entry_date'] = "N/A"
 
-                # 4. text-error svelte-1nx0ef2 (獲利趴數 & 權重)
+                # 4. 抓取獲利趴數 (利用 slot="profit" 定位，無視紅綠色 class)
                 try:
-                    # 這兩個通常都是紅色字體，順序通常是: 獲利 -> 權重
-                    error_items = row.find_elements(By.CSS_SELECTOR, ".text-error.svelte-1nx0ef2")
-
-                    if len(error_items) >= 1:
-                        item['profit_percentage'] = error_items[0].text.strip()
-                    else:
-                        item['profit_percentage'] = "N/A"
-
-                    if len(error_items) >= 2:
-                        item['current_weight'] = error_items[1].text.strip()
-                    else:
-                        item['current_weight'] = "N/A"
+                    # 找 slot="profit" 裡面的第一個 span
+                    profit_el = row.find_element(By.CSS_SELECTOR, "div[slot='profit'] span:first-child")
+                    item['profit_percentage'] = profit_el.text.strip()
                 except:
                     item['profit_percentage'] = "N/A"
+
+                # 5. 抓取目前權重 (利用 slot="currentWeight" 定位)
+                try:
+                    # 找 slot="currentWeight" 裡面的 span
+                    weight_el = row.find_element(By.CSS_SELECTOR, "div[slot='currentWeight'] span")
+                    item['current_weight'] = weight_el.text.strip()
+                except:
                     item['current_weight'] = "N/A"
 
                 result_data["holdings"].append(item)
