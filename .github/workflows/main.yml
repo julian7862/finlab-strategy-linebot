@@ -1,12 +1,10 @@
 name: CI/CD & Scheduled Scraper
 
 on:
-  push:
-    branches: [ main ]
   pull_request:
     branches: [ main ]
   schedule:
-    - cron: '0 0 * * *'  # Run daily at midnight UTC
+    - cron: '0 22 * * *'  # Run daily at 22:00 UTC (10 PM)
   workflow_dispatch:  # Enable manual trigger from GitHub UI
 
 jobs:
@@ -41,7 +39,7 @@ jobs:
     name: Run Scraper
     runs-on: ubuntu-latest
     needs: test  # Only run if tests pass
-    if: github.event_name == 'schedule' || github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
 
     steps:
     - name: Checkout code
