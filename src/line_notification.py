@@ -62,7 +62,13 @@ class LineNotification:
                 message_lines.append(f"  ⚖️  權重: {stock.get('current_weight', 'N/A')}")
                 message_lines.append("")
 
-            message_lines.append(f"總計: {len(holdings)} 檔股票")
+            # 計算持股與現金比例 (假設滿倉為 5 檔股票)
+            holdings_count = len(holdings)
+            holdings_percentage = (holdings_count / 5) * 100
+            cash_percentage = 100 - holdings_percentage
+
+            message_lines.append(f"總計: {holdings_count} 檔股票")
+            message_lines.append(f"💼 持股: {holdings_percentage:.0f}% | 💵 現金: {cash_percentage:.0f}%")
         else:
             message_lines.append("目前無持股資料")
 

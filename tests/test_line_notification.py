@@ -53,6 +53,7 @@ class TestLineNotification:
             assert '青雲' in message
             assert '5386' in message
             assert '總計: 2 檔股票' in message
+            assert '💼 持股: 40% | 💵 現金: 60%' in message
 
     def test_format_stock_message_empty_data(self):
         """Test formatting stock message with empty data (backward compatible with list)"""
@@ -89,6 +90,7 @@ class TestLineNotification:
             assert '測試股票' in message
             assert 'N/A' in message  # Should have N/A for missing fields
             assert '總計: 1 檔股票' in message
+            assert '💼 持股: 20% | 💵 現金: 80%' in message
 
     @patch('src.line_notification.LineBotApi')
     @patch('src.line_notification.TextSendMessage')
@@ -334,6 +336,7 @@ class TestLineNotification:
             assert '科嶠' in message
             assert '4542' in message
             assert '總計: 1 檔股票' in message
+            assert '💼 持股: 20% | 💵 現金: 80%' in message
 
     def test_format_stock_message_with_no_open_buy(self):
         """Test formatting stock message when no open_buy stocks"""
@@ -363,6 +366,7 @@ class TestLineNotification:
             assert '📈 目前持股' in message
             assert '科嶠' in message
             assert '總計: 1 檔股票' in message
+            assert '💼 持股: 20% | 💵 現金: 80%' in message
 
     def test_format_stock_message_with_only_open_buy(self):
         """Test formatting stock message with only open_buy stocks"""
