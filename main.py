@@ -10,7 +10,7 @@ def main():
     config = load_config()
     target_url = config["target_url"]
     line_channel_access_token = config.get("line_channel_access_token")
-    line_user_id = config.get("line_user_id")
+    line_user_ids = config.get("line_user_ids", [])
     line_group_ids = config.get("line_group_ids", [])
 
     print(f"準備抓取目標網址: {target_url}")
@@ -22,13 +22,13 @@ def main():
         print_scrape_results(data)
 
         # 發送到 LINE
-        if line_channel_access_token and line_user_id:
+        if line_channel_access_token and line_user_ids:
             print("\n準備發送訊息到 LINE...")
-            line_notifier = LineNotification(line_channel_access_token, line_user_id, line_group_ids)
+            line_notifier = LineNotification(line_channel_access_token, line_user_ids, line_group_ids)
             line_notifier.send_stock_data(data)
             print("LINE 訊息發送完成！")
         else:
-            print("\n跳過 LINE 通知（未設定 LINE_CHANNEL_ACCESS_TOKEN 或 LINE_USER_ID）")
+            print("\n跳過 LINE 通知（未設定 LINE_CHANNEL_ACCESS_TOKEN 或 LINE_USER_IDS）")
 
     except Exception as e:
         print(f"執行發生錯誤: {e}")

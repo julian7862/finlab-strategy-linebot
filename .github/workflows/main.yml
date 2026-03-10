@@ -65,7 +65,7 @@ jobs:
       env:
         TARGET_URL: ${{ secrets.TARGET_URL }}
         LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
-        LINE_USER_ID: ${{ secrets.LINE_USER_ID }}
+        LINE_USER_IDS: ${{ secrets.LINE_USER_IDS }}
         LINE_GROUP_IDS: ${{ secrets.LINE_GROUP_IDS }}
       run: |
         python main.py

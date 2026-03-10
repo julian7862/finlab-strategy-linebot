@@ -11,17 +11,17 @@ class LineNotification:
     處理 LINE Bot 訊息推送的類別
     """
 
-    def __init__(self, channel_access_token, user_id, group_ids=None):
+    def __init__(self, channel_access_token, user_ids, group_ids=None):
         """
         初始化 LINE Bot API
 
         Args:
             channel_access_token (str): LINE Channel Access Token
-            user_id (str): LINE User ID
+            user_ids (list): LINE User IDs 列表
             group_ids (list): LINE Group IDs 列表 (optional)
         """
         self.line_bot_api = LineBotApi(channel_access_token)
-        self.user_id = user_id
+        self.user_ids = user_ids or []
         self.group_ids = group_ids or []
 
     def format_stock_message(self, data):
@@ -91,9 +91,10 @@ class LineNotification:
             message_text = self.format_stock_message(data)
             message = TextSendMessage(text=message_text)
 
-            # 發送給個人用戶
-            self.line_bot_api.push_message(self.user_id, message)
-            print(f"成功發送訊息到 LINE (User ID: {self.user_id})")
+            # 發送給所有個人用戶
+            for user_id in self.user_ids:
+                self.line_bot_api.push_message(user_id, message)
+                print(f"成功發送訊息到 LINE (User ID: {user_id})")
 
             # 發送給所有群組
             for group_id in self.group_ids:
@@ -122,8 +123,9 @@ class LineNotification:
         """
         try:
             message = TextSendMessage(text=text)
-            self.line_bot_api.push_message(self.user_id, message)
-            print(f"成功發送文字訊息到 LINE")
+            for user_id in self.user_ids:
+                self.line_bot_api.push_message(user_id, message)
+                print(f"成功發送文字訊息到 LINE (User ID: {user_id})")
             return True
 
         except LineBotApiError as e:

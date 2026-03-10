@@ -12,21 +12,21 @@ class TestLineNotification:
     def test_init(self):
         """Test LineNotification initialization"""
         token = "test_token"
-        user_id = "test_user_id"
+        user_ids = ["test_user_id"]
 
         with patch('src.line_notification.LineBotApi') as mock_api:
-            notifier = LineNotification(token, user_id)
+            notifier = LineNotification(token, user_ids)
 
-            assert notifier.user_id == user_id
+            assert notifier.user_ids == user_ids
             mock_api.assert_called_once_with(token)
 
     def test_format_stock_message_with_data(self):
         """Test formatting stock message with valid data (backward compatible with list)"""
         token = "test_token"
-        user_id = "test_user_id"
+        user_ids = ["test_user_id"]
 
         with patch('src.line_notification.LineBotApi'):
-            notifier = LineNotification(token, user_id)
+            notifier = LineNotification(token, user_ids)
 
             test_data = [
                 {
@@ -58,10 +58,10 @@ class TestLineNotification:
     def test_format_stock_message_empty_data(self):
         """Test formatting stock message with empty data (backward compatible with list)"""
         token = "test_token"
-        user_id = "test_user_id"
+        user_ids = ["test_user_id"]
 
         with patch('src.line_notification.LineBotApi'):
-            notifier = LineNotification(token, user_id)
+            notifier = LineNotification(token, user_ids)
 
             message = notifier.format_stock_message([])
 
@@ -73,10 +73,10 @@ class TestLineNotification:
     def test_format_stock_message_missing_fields(self):
         """Test formatting stock message with missing fields"""
         token = "test_token"
-        user_id = "test_user_id"
+        user_ids = ["test_user_id"]
 
         with patch('src.line_notification.LineBotApi'):
-            notifier = LineNotification(token, user_id)
+            notifier = LineNotification(token, user_ids)
 
             test_data = [
                 {
@@ -98,7 +98,7 @@ class TestLineNotification:
         """Test successful stock data sending"""
         # Arrange
         token = "test_token"
-        user_id = "test_user_id"
+        user_ids = ["test_user_id"]
         mock_api_instance = Mock()
         mock_api.return_value = mock_api_instance
 
@@ -112,7 +112,7 @@ class TestLineNotification:
             }
         ]
 
-        notifier = LineNotification(token, user_id)
+        notifier = LineNotification(token, user_ids)
 
         # Act
         result = notifier.send_stock_data(test_data)
@@ -127,7 +127,7 @@ class TestLineNotification:
         """Test sending stock data with LINE API error"""
         # Arrange
         token = "test_token"
-        user_id = "test_user_id"
+        user_ids = ["test_user_id"]
         mock_api_instance = Mock()
         mock_api.return_value = mock_api_instance
 
@@ -136,7 +136,7 @@ class TestLineNotification:
 
         test_data = [{'name': 'test'}]
 
-        notifier = LineNotification(token, user_id)
+        notifier = LineNotification(token, user_ids)
 
         # Act & Assert
         with pytest.raises(Exception):
@@ -148,11 +148,11 @@ class TestLineNotification:
         """Test successful text message sending"""
         # Arrange
         token = "test_token"
-        user_id = "test_user_id"
+        user_ids = ["test_user_id"]
         mock_api_instance = Mock()
         mock_api.return_value = mock_api_instance
 
-        notifier = LineNotification(token, user_id)
+        notifier = LineNotification(token, user_ids)
 
         # Act
         result = notifier.send_text_message("Hello World!!!")
@@ -160,7 +160,7 @@ class TestLineNotification:
         # Assert
         assert result is True
         mock_api_instance.push_message.assert_called_once_with(
-            user_id,
+            "test_user_id",
             mock_text_msg.return_value
         )
         mock_text_msg.assert_called_once_with(text="Hello World!!!")
@@ -170,14 +170,14 @@ class TestLineNotification:
         """Test sending text message with LINE API error"""
         # Arrange
         token = "test_token"
-        user_id = "test_user_id"
+        user_ids = ["test_user_id"]
         mock_api_instance = Mock()
         mock_api.return_value = mock_api_instance
 
         # Simulate Exception (simpler than creating full LineBotApiError)
         mock_api_instance.push_message.side_effect = Exception("API Error")
 
-        notifier = LineNotification(token, user_id)
+        notifier = LineNotification(token, user_ids)
 
         # Act & Assert
         with pytest.raises(Exception):
@@ -189,11 +189,11 @@ class TestLineNotification:
         """Test sending empty stock data list"""
         # Arrange
         token = "test_token"
-        user_id = "test_user_id"
+        user_ids = ["test_user_id"]
         mock_api_instance = Mock()
         mock_api.return_value = mock_api_instance
 
-        notifier = LineNotification(token, user_id)
+        notifier = LineNotification(token, user_ids)
 
         # Act
         result = notifier.send_stock_data([])
@@ -208,25 +208,25 @@ class TestLineNotification:
     def test_init_with_group_ids(self):
         """Test LineNotification initialization with group IDs"""
         token = "test_token"
-        user_id = "test_user_id"
+        user_ids = ["test_user_id"]
         group_ids = ["group1", "group2"]
 
         with patch('src.line_notification.LineBotApi') as mock_api:
-            notifier = LineNotification(token, user_id, group_ids)
+            notifier = LineNotification(token, user_ids, group_ids)
 
-            assert notifier.user_id == user_id
+            assert notifier.user_ids == user_ids
             assert notifier.group_ids == group_ids
             mock_api.assert_called_once_with(token)
 
     def test_init_without_group_ids(self):
         """Test LineNotification initialization without group IDs"""
         token = "test_token"
-        user_id = "test_user_id"
+        user_ids = ["test_user_id"]
 
         with patch('src.line_notification.LineBotApi') as mock_api:
-            notifier = LineNotification(token, user_id)
+            notifier = LineNotification(token, user_ids)
 
-            assert notifier.user_id == user_id
+            assert notifier.user_ids == user_ids
             assert notifier.group_ids == []
             mock_api.assert_called_once_with(token)
 
@@ -236,7 +236,7 @@ class TestLineNotification:
         """Test sending stock data to multiple groups"""
         # Arrange
         token = "test_token"
-        user_id = "test_user_id"
+        user_ids = ["test_user_id"]
         group_ids = ["group1", "group2", "group3"]
         mock_api_instance = Mock()
         mock_api.return_value = mock_api_instance
@@ -251,7 +251,7 @@ class TestLineNotification:
             }
         ]
 
-        notifier = LineNotification(token, user_id, group_ids)
+        notifier = LineNotification(token, user_ids, group_ids)
 
         # Act
         result = notifier.send_stock_data(test_data)
@@ -263,7 +263,7 @@ class TestLineNotification:
 
         # Verify calls to user and all groups
         calls = mock_api_instance.push_message.call_args_list
-        assert calls[0][0][0] == user_id
+        assert calls[0][0][0] == "test_user_id"
         assert calls[1][0][0] == "group1"
         assert calls[2][0][0] == "group2"
         assert calls[3][0][0] == "group3"
@@ -274,7 +274,7 @@ class TestLineNotification:
         """Test sending stock data with empty group list"""
         # Arrange
         token = "test_token"
-        user_id = "test_user_id"
+        user_ids = ["test_user_id"]
         group_ids = []
         mock_api_instance = Mock()
         mock_api.return_value = mock_api_instance
@@ -289,7 +289,7 @@ class TestLineNotification:
             }
         ]
 
-        notifier = LineNotification(token, user_id, group_ids)
+        notifier = LineNotification(token, user_ids, group_ids)
 
         # Act
         result = notifier.send_stock_data(test_data)
@@ -298,15 +298,15 @@ class TestLineNotification:
         assert result is True
         # Should only call push_message once for user
         mock_api_instance.push_message.assert_called_once()
-        assert mock_api_instance.push_message.call_args[0][0] == user_id
+        assert mock_api_instance.push_message.call_args[0][0] == "test_user_id"
 
     def test_format_stock_message_with_new_dict_format(self):
         """Test formatting stock message with new dict format"""
         token = "test_token"
-        user_id = "test_user_id"
+        user_ids = ["test_user_id"]
 
         with patch('src.line_notification.LineBotApi'):
-            notifier = LineNotification(token, user_id)
+            notifier = LineNotification(token, user_ids)
 
             test_data = {
                 "holdings": [
@@ -341,10 +341,10 @@ class TestLineNotification:
     def test_format_stock_message_with_no_open_buy(self):
         """Test formatting stock message when no open_buy stocks"""
         token = "test_token"
-        user_id = "test_user_id"
+        user_ids = ["test_user_id"]
 
         with patch('src.line_notification.LineBotApi'):
-            notifier = LineNotification(token, user_id)
+            notifier = LineNotification(token, user_ids)
 
             test_data = {
                 "holdings": [
@@ -371,10 +371,10 @@ class TestLineNotification:
     def test_format_stock_message_with_only_open_buy(self):
         """Test formatting stock message with only open_buy stocks"""
         token = "test_token"
-        user_id = "test_user_id"
+        user_ids = ["test_user_id"]
 
         with patch('src.line_notification.LineBotApi'):
-            notifier = LineNotification(token, user_id)
+            notifier = LineNotification(token, user_ids)
 
             test_data = {
                 "holdings": [],
@@ -403,10 +403,10 @@ class TestLineNotification:
     def test_format_stock_message_with_no_data(self):
         """Test formatting stock message when both holdings and open_buy are empty"""
         token = "test_token"
-        user_id = "test_user_id"
+        user_ids = ["test_user_id"]
 
         with patch('src.line_notification.LineBotApi'):
-            notifier = LineNotification(token, user_id)
+            notifier = LineNotification(token, user_ids)
 
             test_data = {
                 "holdings": [],
@@ -422,10 +422,10 @@ class TestLineNotification:
     def test_format_stock_message_with_multiple_open_buy(self):
         """Test formatting stock message with multiple open_buy stocks"""
         token = "test_token"
-        user_id = "test_user_id"
+        user_ids = ["test_user_id"]
 
         with patch('src.line_notification.LineBotApi'):
-            notifier = LineNotification(token, user_id)
+            notifier = LineNotification(token, user_ids)
 
             test_data = {
                 "holdings": [],
@@ -445,3 +445,157 @@ class TestLineNotification:
             assert '2222' in message
             assert '股票3' in message
             assert '3333' in message
+
+    def test_init_with_multiple_user_ids(self):
+        """Test LineNotification initialization with multiple user IDs"""
+        token = "test_token"
+        user_ids = ["user1", "user2", "user3"]
+
+        with patch('src.line_notification.LineBotApi') as mock_api:
+            notifier = LineNotification(token, user_ids)
+
+            assert notifier.user_ids == user_ids
+            assert notifier.group_ids == []
+            mock_api.assert_called_once_with(token)
+
+    def test_init_without_user_ids(self):
+        """Test LineNotification initialization without user IDs"""
+        token = "test_token"
+
+        with patch('src.line_notification.LineBotApi') as mock_api:
+            notifier = LineNotification(token, None)
+
+            assert notifier.user_ids == []
+            assert notifier.group_ids == []
+            mock_api.assert_called_once_with(token)
+
+    @patch('src.line_notification.LineBotApi')
+    @patch('src.line_notification.TextSendMessage')
+    def test_send_stock_data_to_multiple_users(self, mock_text_msg, mock_api):
+        """Test sending stock data to multiple users"""
+        # Arrange
+        token = "test_token"
+        user_ids = ["user1", "user2", "user3"]
+        mock_api_instance = Mock()
+        mock_api.return_value = mock_api_instance
+
+        test_data = [
+            {
+                'name': '科嶠',
+                'stock_id': '4542',
+                'entry_date': '2026/2/6',
+                'profit_percentage': '▴ 10.00%',
+                'current_weight': '20.0%'
+            }
+        ]
+
+        notifier = LineNotification(token, user_ids)
+
+        # Act
+        result = notifier.send_stock_data(test_data)
+
+        # Assert
+        assert result is True
+        # Should call push_message for 3 users
+        assert mock_api_instance.push_message.call_count == 3
+
+        # Verify calls to all users
+        calls = mock_api_instance.push_message.call_args_list
+        assert calls[0][0][0] == "user1"
+        assert calls[1][0][0] == "user2"
+        assert calls[2][0][0] == "user3"
+
+    @patch('src.line_notification.LineBotApi')
+    @patch('src.line_notification.TextSendMessage')
+    def test_send_stock_data_to_users_and_groups(self, mock_text_msg, mock_api):
+        """Test sending stock data to multiple users and groups"""
+        # Arrange
+        token = "test_token"
+        user_ids = ["user1", "user2"]
+        group_ids = ["group1", "group2"]
+        mock_api_instance = Mock()
+        mock_api.return_value = mock_api_instance
+
+        test_data = [
+            {
+                'name': '科嶠',
+                'stock_id': '4542',
+                'entry_date': '2026/2/6',
+                'profit_percentage': '▴ 10.00%',
+                'current_weight': '20.0%'
+            }
+        ]
+
+        notifier = LineNotification(token, user_ids, group_ids)
+
+        # Act
+        result = notifier.send_stock_data(test_data)
+
+        # Assert
+        assert result is True
+        # Should call push_message for 2 users + 2 groups = 4 times
+        assert mock_api_instance.push_message.call_count == 4
+
+        # Verify calls to users and groups
+        calls = mock_api_instance.push_message.call_args_list
+        assert calls[0][0][0] == "user1"
+        assert calls[1][0][0] == "user2"
+        assert calls[2][0][0] == "group1"
+        assert calls[3][0][0] == "group2"
+
+    @patch('src.line_notification.LineBotApi')
+    @patch('src.line_notification.TextSendMessage')
+    def test_send_stock_data_empty_users(self, mock_text_msg, mock_api):
+        """Test sending stock data with empty user list"""
+        # Arrange
+        token = "test_token"
+        user_ids = []
+        mock_api_instance = Mock()
+        mock_api.return_value = mock_api_instance
+
+        test_data = [
+            {
+                'name': '科嶠',
+                'stock_id': '4542',
+                'entry_date': '2026/2/6',
+                'profit_percentage': '▴ 10.00%',
+                'current_weight': '20.0%'
+            }
+        ]
+
+        notifier = LineNotification(token, user_ids)
+
+        # Act
+        result = notifier.send_stock_data(test_data)
+
+        # Assert
+        assert result is True
+        # Should not call push_message if no users
+        mock_api_instance.push_message.assert_not_called()
+
+    @patch('src.line_notification.LineBotApi')
+    @patch('src.line_notification.TextSendMessage')
+    def test_send_text_message_to_multiple_users(self, mock_text_msg, mock_api):
+        """Test sending text message to multiple users"""
+        # Arrange
+        token = "test_token"
+        user_ids = ["user1", "user2", "user3"]
+        mock_api_instance = Mock()
+        mock_api.return_value = mock_api_instance
+
+        notifier = LineNotification(token, user_ids)
+
+        # Act
+        result = notifier.send_text_message("Hello World!!!")
+
+        # Assert
+        assert result is True
+        # Should call push_message for 3 users
+        assert mock_api_instance.push_message.call_count == 3
+
+        # Verify all calls
+        calls = mock_api_instance.push_message.call_args_list
+        assert calls[0][0][0] == "user1"
+        assert calls[1][0][0] == "user2"
+        assert calls[2][0][0] == "user3"
+        mock_text_msg.assert_called_once_with(text="Hello World!!!")

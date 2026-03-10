@@ -59,7 +59,7 @@ nano .env  # or use your preferred editor
 Update the following variables in `.env`:
 ```env
 LINE_CHANNEL_ACCESS_TOKEN=your_line_channel_access_token_here
-LINE_USER_ID=your_line_user_id_here
+LINE_USER_IDS=user_id_1,user_id_2,user_id_3  # Comma-separated user IDs
 LINE_GROUP_IDS=group_id_1,group_id_2,group_id_3  # Optional, comma-separated
 TARGET_URL=https://your_target_website_here
 CHROME_DRIVER_PATH=/usr/local/bin/chromedriver  # Optional
@@ -70,7 +70,7 @@ CHROME_DRIVER_PATH=/usr/local/bin/chromedriver  # Optional
 ```bash
 export TARGET_URL=https://your_target_website_here
 export LINE_CHANNEL_ACCESS_TOKEN=your_token_here
-export LINE_USER_ID=your_user_id_here
+export LINE_USER_IDS=user_id_1,user_id_2,user_id_3
 export LINE_GROUP_IDS=group_id_1,group_id_2,group_id_3  # Optional
 ```
 
@@ -133,7 +133,7 @@ pytest tests/test_scraper.py -v
 |----------|----------|-------------|
 | `TARGET_URL` | ✅ Yes | URL of the Finlab strategy page |
 | `LINE_CHANNEL_ACCESS_TOKEN` | ⚠️ Optional | LINE Bot channel access token |
-| `LINE_USER_ID` | ⚠️ Optional | LINE user ID to send messages to |
+| `LINE_USER_IDS` | ⚠️ Optional | Comma-separated LINE user IDs (e.g., `user1,user2,user3`) |
 | `LINE_GROUP_IDS` | ❌ No | Comma-separated LINE group IDs (e.g., `group1,group2,group3`) |
 | `LINE_WEBHOOK_URL` | ❌ No | LINE webhook URL (future use) |
 | `CHROME_DRIVER_PATH` | ❌ No | Custom ChromeDriver path |
@@ -161,7 +161,7 @@ The application supports deployment to various platforms:
 ```dockerfile
 ENV TARGET_URL=https://production.com
 ENV LINE_CHANNEL_ACCESS_TOKEN=prod_token
-ENV LINE_USER_ID=prod_user_id
+ENV LINE_USER_IDS=user_id_1,user_id_2
 ENV LINE_GROUP_IDS=group_id_1,group_id_2
 ```
 
@@ -169,7 +169,7 @@ ENV LINE_GROUP_IDS=group_id_1,group_id_2
 ```bash
 heroku config:set TARGET_URL=https://production.com
 heroku config:set LINE_CHANNEL_ACCESS_TOKEN=prod_token
-heroku config:set LINE_USER_ID=prod_user_id
+heroku config:set LINE_USER_IDS=user_id_1,user_id_2
 heroku config:set LINE_GROUP_IDS=group_id_1,group_id_2
 ```
 
@@ -196,7 +196,8 @@ pip install -r requirements.txt
 
 **Issue: LINE notification not working**
 - Verify `LINE_CHANNEL_ACCESS_TOKEN` is correct
-- Verify `LINE_USER_ID` is correct
+- Verify `LINE_USER_IDS` are comma-separated without quotes
+- Check that user IDs start with 'U' (e.g., `Uce142fc90e26599eb9df68c2cef86449`)
 - Check LINE Bot console for errors
 
 **Issue: LINE group notifications not working**

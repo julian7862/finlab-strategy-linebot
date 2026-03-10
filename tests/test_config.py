@@ -20,7 +20,7 @@ class TestConfig:
             env_values = {
                 'TARGET_URL': 'https://example.com',
                 'LINE_CHANNEL_ACCESS_TOKEN': 'test_token',
-                'LINE_USER_ID': 'test_user',
+                'LINE_USER_IDS': 'test_user',
                 'LINE_WEBHOOK_URL': 'https://webhook.com'
             }
             return env_values.get(key, default)
@@ -33,7 +33,7 @@ class TestConfig:
         # Assert
         assert config['target_url'] == 'https://example.com'
         assert config['line_channel_access_token'] == 'test_token'
-        assert config['line_user_id'] == 'test_user'
+        assert config['line_user_ids'] == ['test_user']
         assert config['line_webhook_url'] == 'https://webhook.com'
         mock_load_dotenv.assert_called_once()
 
@@ -41,7 +41,7 @@ class TestConfig:
     @patch.dict(os.environ, {
         'TARGET_URL': 'https://os-env.com',
         'LINE_CHANNEL_ACCESS_TOKEN': 'os_token',
-        'LINE_USER_ID': 'os_user',
+        'LINE_USER_IDS': 'os_user',
         'LINE_WEBHOOK_URL': 'https://os-webhook.com'
     })
     def test_load_from_os_environ(self, mock_load_dotenv):
@@ -52,7 +52,7 @@ class TestConfig:
         # Assert
         assert config['target_url'] == 'https://os-env.com'
         assert config['line_channel_access_token'] == 'os_token'
-        assert config['line_user_id'] == 'os_user'
+        assert config['line_user_ids'] == ['os_user']
         assert config['line_webhook_url'] == 'https://os-webhook.com'
 
     @patch('src.utils.config.load_dotenv')
@@ -107,7 +107,7 @@ class TestConfig:
         # Assert
         assert config['target_url'] == 'https://test.com'
         assert config['line_channel_access_token'] is None
-        assert config['line_user_id'] is None
+        assert config['line_user_ids'] == []
         assert config['line_webhook_url'] is None
 
     @patch('src.utils.config.load_dotenv')
@@ -176,4 +176,72 @@ class TestConfig:
         assert config['line_group_ids'] == [
             'Ce8baec57b9b59c0b19766c6988ccd0b9',
             'Cae25addef5acd7a43e1a075dc8e01728'
+        ]
+
+    @patch('src.utils.config.load_dotenv')
+    @patch('src.utils.config.os.getenv')
+    @patch.dict(os.environ, {
+        'TARGET_URL': 'https://test.com',
+        'LINE_USER_IDS': 'user1,user2,user3'
+    }, clear=True)
+    def test_parse_line_user_ids(self, mock_getenv, mock_load_dotenv):
+        """Test parsing comma-separated LINE_USER_IDS"""
+        # Arrange
+        mock_getenv.return_value = None
+
+        # Act
+        config = load_config()
+
+        # Assert
+        assert config['line_user_ids'] == ['user1', 'user2', 'user3']
+
+    @patch('src.utils.config.load_dotenv')
+    @patch('src.utils.config.os.getenv')
+    @patch.dict(os.environ, {
+        'TARGET_URL': 'https://test.com',
+        'LINE_USER_IDS': 'user1 , user2 , user3 '
+    }, clear=True)
+    def test_parse_line_user_ids_with_whitespace(self, mock_getenv, mock_load_dotenv):
+        """Test parsing LINE_USER_IDS with whitespace"""
+        # Arrange
+        mock_getenv.return_value = None
+
+        # Act
+        config = load_config()
+
+        # Assert
+        assert config['line_user_ids'] == ['user1', 'user2', 'user3']
+
+    @patch('src.utils.config.load_dotenv')
+    @patch('src.utils.config.os.getenv')
+    @patch.dict(os.environ, {'TARGET_URL': 'https://test.com'}, clear=True)
+    def test_empty_line_user_ids(self, mock_getenv, mock_load_dotenv):
+        """Test that empty LINE_USER_IDS returns empty list"""
+        # Arrange
+        mock_getenv.return_value = None
+
+        # Act
+        config = load_config()
+
+        # Assert
+        assert config['line_user_ids'] == []
+
+    @patch('src.utils.config.load_dotenv')
+    @patch('src.utils.config.os.getenv')
+    @patch.dict(os.environ, {
+        'TARGET_URL': 'https://test.com',
+        'LINE_USER_IDS': 'Uce142fc90e26599eb9df68c2cef86449,U9ab8c3592aea16310b037f9084cef854'
+    }, clear=True)
+    def test_parse_real_line_user_ids(self, mock_getenv, mock_load_dotenv):
+        """Test parsing real LINE user IDs"""
+        # Arrange
+        mock_getenv.return_value = None
+
+        # Act
+        config = load_config()
+
+        # Assert
+        assert config['line_user_ids'] == [
+            'Uce142fc90e26599eb9df68c2cef86449',
+            'U9ab8c3592aea16310b037f9084cef854'
         ]
