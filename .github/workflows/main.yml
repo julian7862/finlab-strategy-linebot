@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [ main ]
   schedule:
-    - cron: '0 22 * * *'  # Run daily at 22:00 UTC (10 PM)
+    - cron: '0 22 * * 1-5'  # Run at 22:00 UTC on weekdays (Mon-Fri)
   workflow_dispatch:  # Enable manual trigger from GitHub UI
 
 jobs:
