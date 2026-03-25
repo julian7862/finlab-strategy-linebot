@@ -245,3 +245,40 @@ class TestConfig:
             'Uce142fc90e26599eb9df68c2cef86449',
             'U9ab8c3592aea16310b037f9084cef854'
         ]
+
+    @patch('src.utils.config.load_dotenv')
+    @patch('src.utils.config.os.getenv')
+    @patch.dict(os.environ, {
+        'TARGET_URL': 'https://test.com',
+        'LINE_CHANNEL_ACCESS_TOKEN_2': 'test_token_2',
+        'LINE_USER_IDS_2': 'user1,user2',
+        'LINE_GROUP_IDS_2': 'group1,group2'
+    }, clear=True)
+    def test_load_second_line_account_config(self, mock_getenv, mock_load_dotenv):
+        """Test loading second LINE account configuration"""
+        # Arrange
+        mock_getenv.return_value = None
+
+        # Act
+        config = load_config()
+
+        # Assert
+        assert config['line_channel_access_token_2'] == 'test_token_2'
+        assert config['line_user_ids_2'] == ['user1', 'user2']
+        assert config['line_group_ids_2'] == ['group1', 'group2']
+
+    @patch('src.utils.config.load_dotenv')
+    @patch('src.utils.config.os.getenv')
+    @patch.dict(os.environ, {'TARGET_URL': 'https://test.com'}, clear=True)
+    def test_optional_second_line_account(self, mock_getenv, mock_load_dotenv):
+        """Test that second LINE account credentials are optional"""
+        # Arrange
+        mock_getenv.return_value = None
+
+        # Act
+        config = load_config()
+
+        # Assert
+        assert config['line_channel_access_token_2'] is None
+        assert config['line_user_ids_2'] == []
+        assert config['line_group_ids_2'] == []
