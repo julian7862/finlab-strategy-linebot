@@ -67,5 +67,8 @@ jobs:
         LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
         LINE_USER_IDS: ${{ secrets.LINE_USER_IDS }}
         LINE_GROUP_IDS: ${{ secrets.LINE_GROUP_IDS }}
+        LINE_CHANNEL_ACCESS_TOKEN_2: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN_2 }}
+        LINE_USER_IDS_2: ${{ secrets.LINE_USER_IDS_2 }}
+        LINE_GROUP_IDS_2: ${{ secrets.LINE_GROUP_IDS_2 }}
       run: |
         python main.py
