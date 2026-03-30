@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [ main ]
   schedule:
-    - cron: '0 22 * * 1-5'  # Run at 22:00 UTC on weekdays (Mon-Fri)
+    - cron: '0 22 * * 0-4'  # Run at 22:00 UTC (06:00 Taiwan time) on Sun-Thu (Mon-Fri Taiwan time)
   workflow_dispatch:  # Enable manual trigger from GitHub UI
 
 jobs:
